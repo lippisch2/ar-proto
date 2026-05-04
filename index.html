@@ -12,7 +12,7 @@
     <a-marker preset="hiro" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
       
       <!-- radius="0.08" (double de 0.015) et position="0.05 0 0" (5cm sur l'axe X) -->
-<a-entity position="0 1 0" rotation="0 45 90">
+<a-entity position="0 1 0" rotation="0 -45 90">
     <!-- 1. Trajectoire (Axe de travail) -->
     <a-cylinder position="0 0.15 0" radius="0.01" height="0.8" color="yellow" opacity="0.5"></a-cylinder>
     
@@ -21,6 +21,7 @@
     
     <!-- 3. Anneau de guidage (Feedback visuel) -->
     <a-ring position="0 0.05 0" radius-inner="0.03" radius-outer="0.06" color="white" rotation="-90 0 0"></a-ring>
+    <a-ring position="0 0.3 0" radius-inner="0.03" radius-outer="0.06" color="white" rotation="-90 0 0"></a-ring>
 </a-entity>
     </a-marker>
     <a-entity camera></a-entity>

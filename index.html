@@ -12,21 +12,24 @@
     <a-marker preset="hiro" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
       
       <!-- radius="0.08" (double de 0.015) et position="0.05 0 0" (5cm sur l'axe X) -->
-   <a-entity rotation="votre_angle_planifié">
-    <!-- 1. Trajectoire (Axe de travail) -->
-    <a-cylinder position="0 0.15 0" radius="0.002" height="0.3" color="yellow" opacity="0.5"></a-cylinder>
-    
-    <!-- 2. Cible (Lésion) -->
-    <a-sphere position="0 0 0" radius="0.006" color="red"></a-sphere>
-    
-    <!-- 3. Anneau de guidage (Feedback visuel) -->
-    <a-ring position="0 0.05 0" radius-inner="0.008" radius-outer="0.01" color="white" rotation="-90 0 0"></a-ring>
-</a-entity>
-    
-    
-    
+      <a-entity position="0.2 1 0.1">
+    <!-- Cylindre (Aiguille) -->
+    <a-cylinder position="0 0.1 0" 
+            rotation="45 0 45" 
+            radius="0.007" height="0.4" 
+            color="green" material="opacity:0.8;"></a-cylinder>
+    <a-sphere position="0 0.1 0" 
+              rotation="-30 0 10" 
+              radius="0.02" color="red"></a-sphere> 
+    <!-- Image translucide -->
+    <!-- Placez-la légèrement décalée pour ne pas masquer l'aiguille -->
+    <a-image src="slice.jpg" 
+             position="0.1 0.1 0"
+             rotation="-90 0 0"
+             width="1.602" height="0.9" 
+             material="opacity: 0.5; transparent: true; side: double;"></a-image>
+      </a-entity>
     </a-marker>
-    
     <a-entity camera></a-entity>
   </a-scene>
 </body>

@@ -9,18 +9,24 @@
 
 <!-- Curseurs de contrôle -->
 <!-- Interface de contrôle avec affichage des valeurs -->
-<div style="position: absolute; top: 10px; left: 10px; z-index: 1000; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 20px; color: white; font-family: sans-serif; font-size: 14px;">
-    <div style="margin-bottom: 5px;">
-        Angle X: <span id="valX">0</span>°<br>
-        <input type="range" id="rotX" min="-90" max="90" value="0" style="width: 150px;">
+<div style="position: absolute; top: 10px; left: 10px; z-index: 1000; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; color: white; font-family: sans-serif; font-size: 14px;">
+    <!-- Ligne X -->
+    <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="width: 100px;">Rot X: <span id="valX">0</span>°</div>
+        <input type="range" id="rotX" min="-90" max="90" value="0" style="width: 80px; margin: 0 10px;">
+        <input type="number" id="posX" placeholder="X" style="width: 50px;">
     </div>
-    <div style="margin-bottom: 5px;">
-        Angle Y: <span id="valY">0</span>°<br>
-        <input type="range" id="rotY" min="-90" max="90" value="0" style="width: 150px;">
+    <!-- Ligne Y -->
+    <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="width: 100px;">Rot Y: <span id="valY">0</span>°</div>
+        <input type="range" id="rotY" min="-90" max="90" value="0" style="width: 80px; margin: 0 10px;">
+        <input type="number" id="posY" placeholder="Y" style="width: 50px;">
     </div>
-    <div>
-        Angle Z: <span id="valZ">0</span>°<br>
-        <input type="range" id="rotZ" min="-90" max="90" value="0" style="width: 150px;">
+    <!-- Ligne Z -->
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="width: 100px;">Rot Z: <span id="valZ">0</span>°</div>
+        <input type="range" id="rotZ" min="-90" max="90" value="0" style="width: 80px; margin: 0 10px;">
+        <input type="number" id="posZ" placeholder="Z" style="width: 50px;">
     </div>
 </div>
 
@@ -41,22 +47,31 @@
 
 <script>
   const guide = document.getElementById('guide-group');
-  const sliders = ['X', 'Y', 'Z'];
   
-  sliders.forEach(axis => {
-    const input = document.getElementById('rot' + axis);
-    const display = document.getElementById('val' + axis);
-    
-    input.addEventListener('input', () => {
-      // Met à jour l'affichage numérique
-      display.textContent = input.value;
-      // Met à jour la rotation de l'entité
+  // Fonction pour mettre à jour
+  function updateGuide() {
+      // Mise à jour rotation
       guide.setAttribute('rotation', {
         x: document.getElementById('rotX').value,
         y: document.getElementById('rotY').value,
         z: document.getElementById('rotZ').value
       });
-    });
+      // Mise à jour position
+      guide.setAttribute('position', {
+        x: document.getElementById('posX').value / 100, // conversion cm vers unités AR
+        y: document.getElementById('posY').value / 100,
+        z: document.getElementById('posZ').value / 100
+      });
+  }
+
+  // Écouteurs pour les sliders
+  ['X', 'Y', 'Z'].forEach(axis => {
+      document.getElementById('rot' + axis).addEventListener('input', (e) => {
+          document.getElementById('val' + axis).textContent = e.target.value;
+          updateGuide();
+      });
+      // Écouteurs pour les champs texte
+      document.getElementById('pos' + axis).addEventListener('input', updateGuide);
   });
 </script>
 

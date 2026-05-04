@@ -6,25 +6,40 @@
 </head>
 <body style="margin:0;overflow:hidden;">
   <!-- debugUIEnabled: false masque les boîtes texte en bas -->
-  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-    
-    <!-- smooth pour stabiliser le suivi -->
-    <a-marker preset="hiro" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
-      
-      <!-- radius="0.08" (double de 0.015) et position="0.05 0 0" (5cm sur l'axe X) -->
-<a-entity position="0 1 0" rotation="0 -45 90">
-    <!-- 1. Trajectoire (Axe de travail) -->
-    <a-cylinder position="0 0.15 0" radius="0.01" height="0.8" color="yellow" opacity="0.5"></a-cylinder>
-    
+
+<!-- Curseurs de contrôle -->
+<div style="position: absolute; top: 10px; left: 10px; z-index: 1000; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; color: white;">
+    <div>Angle X: <input type="range" id="rotX" min="-90" max="90" value="0"></div>
+    <div>Angle Z: <input type="range" id="rotZ" min="-90" max="90" value="0"></div>
+</div>
+
+<a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    <a-marker preset="hiro">
+        <!-- L'entité groupe qui reçoit la rotation -->
+        <a-entity id="guide-group" position="0 1 0" rotation="0 0 0">
+          <a-cylinder position="0 0.15 0" radius="0.01" height="0.8" color="yellow" opacity="0.5"></a-cylinder>
     <!-- 2. Cible (Lésion) -->
-    <a-sphere position="0 0 0" radius="0.05" color="red"></a-sphere>
-    
+          <a-sphere position="0 0 0" radius="0.05" color="red"></a-sphere>
     <!-- 3. Anneau de guidage (Feedback visuel) -->
-    <a-ring position="0 0.05 0" radius-inner="0.03" radius-outer="0.06" color="white" rotation="-90 0 0"></a-ring>
-    <a-ring position="0 0.3 0" radius-inner="0.03" radius-outer="0.06" color="white" rotation="-90 0 0"></a-ring>
-</a-entity>
+          <a-ring position="0 0.05 0" radius-inner="0.03" radius-outer="0.06" color="white" rotation="-90 0 0"></a-ring>
+          <a-ring position="0 0.3 0" radius-inner="0.03" radius-outer="0.06" color="white" rotation="-90 0 0"></a-ring>
+        </a-entity>
     </a-marker>
     <a-entity camera></a-entity>
-  </a-scene>
+</a-scene>
+
+<script>
+  const guide = document.getElementById('guide-group');
+  const rotX = document.getElementById('rotX');
+  const rotZ = document.getElementById('rotZ');
+
+  function updateRotation() {
+      guide.setAttribute('rotation', `${rotX.value} 0 ${rotZ.value}`);
+  }
+
+  rotX.addEventListener('input', updateRotation);
+  rotZ.addEventListener('input', updateRotation);
+</script>
+
 </body>
 </html>

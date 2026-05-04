@@ -8,9 +8,20 @@
   <!-- debugUIEnabled: false masque les boîtes texte en bas -->
 
 <!-- Curseurs de contrôle -->
-<div style="position: absolute; top: 10px; left: 10px; z-index: 1000; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; color: white;">
-    <div>Angle X: <input type="range" id="rotX" min="-90" max="90" value="0"></div>
-    <div>Angle Z: <input type="range" id="rotZ" min="-90" max="90" value="0"></div>
+<!-- Interface de contrôle avec affichage des valeurs -->
+<div style="position: absolute; top: 10px; left: 10px; z-index: 1000; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px; color: white; font-family: sans-serif; font-size: 14px;">
+    <div style="margin-bottom: 10px;">
+        Angle X: <span id="valX">0</span>°<br>
+        <input type="range" id="rotX" min="-90" max="90" value="0" style="width: 150px;">
+    </div>
+    <div style="margin-bottom: 10px;">
+        Angle Y: <span id="valY">0</span>°<br>
+        <input type="range" id="rotY" min="-90" max="90" value="0" style="width: 150px;">
+    </div>
+    <div>
+        Angle Z: <span id="valZ">0</span>°<br>
+        <input type="range" id="rotZ" min="-90" max="90" value="0" style="width: 150px;">
+    </div>
 </div>
 
 <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
@@ -30,15 +41,23 @@
 
 <script>
   const guide = document.getElementById('guide-group');
-  const rotX = document.getElementById('rotX');
-  const rotZ = document.getElementById('rotZ');
-
-  function updateRotation() {
-      guide.setAttribute('rotation', `${rotX.value} 0 ${rotZ.value}`);
-  }
-
-  rotX.addEventListener('input', updateRotation);
-  rotZ.addEventListener('input', updateRotation);
+  const sliders = ['X', 'Y', 'Z'];
+  
+  sliders.forEach(axis => {
+    const input = document.getElementById('rot' + axis);
+    const display = document.getElementById('val' + axis);
+    
+    input.addEventListener('input', () => {
+      // Met à jour l'affichage numérique
+      display.textContent = input.value;
+      // Met à jour la rotation de l'entité
+      guide.setAttribute('rotation', {
+        x: document.getElementById('rotX').value,
+        y: document.getElementById('rotY').value,
+        z: document.getElementById('rotZ').value
+      });
+    });
+  });
 </script>
 
 </body>

@@ -48,32 +48,34 @@
 <script>
   const guide = document.getElementById('guide-group');
   
-  // Fonction pour mettre à jour
   function updateGuide() {
+      // On récupère les valeurs et on force la conversion en nombre
+      // Si le champ est vide, on utilise 0
+      const rx = parseFloat(document.getElementById('rotX').value) || 0;
+      const ry = parseFloat(document.getElementById('rotY').value) || 0;
+      const rz = parseFloat(document.getElementById('rotZ').value) || 0;
+      
+      const px = parseFloat(document.getElementById('posX').value) || 0;
+      const py = parseFloat(document.getElementById('posY').value) || 0;
+      const pz = parseFloat(document.getElementById('posZ').value) || 0;
+
       // Mise à jour rotation
-      guide.setAttribute('rotation', {
-        x: document.getElementById('rotX').value,
-        y: document.getElementById('rotY').value,
-        z: document.getElementById('rotZ').value
-      });
-      // Mise à jour position
-      guide.setAttribute('position', {
-        x: document.getElementById('posX').value / 100, // conversion cm vers unités AR
-        y: document.getElementById('posY').value / 100,
-        z: document.getElementById('posZ').value / 100
-      });
+      guide.setAttribute('rotation', { x: rx, y: ry, z: rz });
+      
+      // Mise à jour position (conversion cm vers mètres)
+      guide.setAttribute('position', { x: px/100, y: py/100, z: pz/100 });
   }
 
   // Écouteurs pour les sliders
   ['X', 'Y', 'Z'].forEach(axis => {
+      // Slider
       document.getElementById('rot' + axis).addEventListener('input', (e) => {
           document.getElementById('val' + axis).textContent = e.target.value;
           updateGuide();
       });
-      // Écouteurs pour les champs texte
+      // Zone texte
       document.getElementById('pos' + axis).addEventListener('input', updateGuide);
   });
 </script>
-
 </body>
 </html>

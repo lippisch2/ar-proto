@@ -1,43 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.8/aframe/build/aframe-ar.js"></script>
+  <style>
+    video {
+      object-fit: fill !important;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+  </style>
 </head>
 <body style="margin:0;overflow:hidden;">
-  <!-- debugUIEnabled: false masque les boîtes texte en bas -->
 
-<!-- Curseurs de contrôle -->
-<!-- Interface de contrôle avec affichage des valeurs -->
-<div style="position: absolute; top: 10px; left: 10px; z-index: 1000; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; color: white; font-family: sans-serif; font-size: 14px;">
-    <!-- Ligne X -->
-    <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
-        <div style="width: 100px;">Rot X: <span id="valX">0</span>°</div>
-        <input type="range" id="rotX" min="-90" max="90" value="0" style="width: 80px; margin: 0 10px;">
-        <input type="number" id="posX" placeholder="X" style="width: 50px;">
-    </div>
-    <!-- Ligne Y -->
-    <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
-        <div style="width: 100px;">Rot Y: <span id="valY">0</span>°</div>
-        <input type="range" id="rotY" min="-90" max="90" value="0" style="width: 80px; margin: 0 10px;">
-        <input type="number" id="posY" placeholder="Y" style="width: 50px;">
-    </div>
-    <!-- Ligne Z -->
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-        <div style="width: 100px;">Rot Z: <span id="valZ">0</span>°</div>
-        <input type="range" id="rotZ" min="-90" max="90" value="0" style="width: 80px; margin: 0 10px;">
-        <input type="number" id="posZ" placeholder="Z" style="width: 50px;">
-    </div>
+<!-- Loading overlay -->
+<div id="loading" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:18px;z-index:9999;">
+  Initializing camera...
 </div>
 
-<a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-    <a-marker preset="hiro">
-        <!-- L'entité groupe qui reçoit la rotation -->
+<!-- Toggle button for control panel -->
+<button id="panelToggle" style="position:absolute;top:10px;left:10px;z-index:1001;background:rgba(0,0,0,0.8);color:white;border:none;border-radius:8px;padding:8px 12px;font-size:18px;cursor:pointer;">
+  &#9881;
+</button>
+
+<!-- Control panel -->
+<div id="controlPanel" style="position:absolute;top:10px;left:10px;z-index:1000;background:rgba(0,0,0,0.8);padding:15px;border-radius:10px;color:white;font-family:sans-serif;font-size:14px;display:none;min-width:280px;">
+
+    <!-- Marker selector -->
+    <div style="margin-bottom:12px;">
+      <div style="margin-bottom:4px;font-weight:bold;">Marker</div>
+      <div style="display:flex;gap:8px;">
+        <button id="btnHiro" class="marker-btn active" onclick="setMarker('hiro')" style="flex:1;padding:6px;border:2px solid #4caf50;border-radius:6px;background:#4caf50;color:white;cursor:pointer;font-size:13px;">Hiro</button>
+        <button id="btnCustom" class="marker-btn" onclick="setMarker('custom')" style="flex:1;padding:6px;border:2px solid #666;border-radius:6px;background:transparent;color:white;cursor:pointer;font-size:13px;">Custom</button>
+      </div>
+    </div>
+
+    <hr style="border-color:#444;margin:10px 0;">
+
+    <!-- X Row -->
+    <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="width:100px;">Rot X: <span id="valX">0</span>&deg;</div>
+        <input type="range" id="rotX" min="-90" max="90" value="0" style="width:80px;margin:0 10px;">
+        <input type="number" id="posX" placeholder="Pos X (cm)" min="-50" max="50" style="width:80px;">
+    </div>
+    <!-- Y Row -->
+    <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="width:100px;">Rot Y: <span id="valY">0</span>&deg;</div>
+        <input type="range" id="rotY" min="-90" max="90" value="0" style="width:80px;margin:0 10px;">
+        <input type="number" id="posY" placeholder="Pos Y (cm)" min="-50" max="50" style="width:80px;">
+    </div>
+    <!-- Z Row -->
+    <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="width:100px;">Rot Z: <span id="valZ">0</span>&deg;</div>
+        <input type="range" id="rotZ" min="-90" max="90" value="0" style="width:80px;margin:0 10px;">
+        <input type="number" id="posZ" placeholder="Pos Z (cm)" min="-50" max="50" style="width:80px;">
+    </div>
+
+    <!-- Position scaling hint -->
+    <div style="font-size:11px;color:#aaa;margin-top:-6px;margin-bottom:10px;">Position values are divided by 100 for world units.</div>
+
+    <hr style="border-color:#444;margin:10px 0;">
+
+    <!-- Reset button -->
+    <button id="resetBtn" onclick="resetGuide()" style="width:100%;padding:8px;border:none;border-radius:6px;background:#e53935;color:white;cursor:pointer;font-size:14px;font-weight:bold;">Reset</button>
+</div>
+
+<a-scene embedded arjs="sourceType: webcam; videoSettings: { ideal: { facingMode: environment, width: { ideal: 1280 }, height: { ideal: 720 } }}; debugUIEnabled: false;">
+    <a-marker id="arMarker" preset="hiro">
         <a-entity id="guide-group" position="0 0 0" rotation="0 0 0">
+          <!-- 1. Needle path guide -->
           <a-cylinder position="0 0.15 0" radius="0.01" height="0.8" color="yellow" opacity="0.5"></a-cylinder>
-    <!-- 2. Cible (Lésion) -->
+          <!-- 2. Target (Lesion) -->
           <a-sphere position="0 0 0" radius="0.05" color="red"></a-sphere>
-    <!-- 3. Anneau de guidage (Feedback visuel) -->
+          <!-- 3. Guidance ring (Visual feedback) -->
           <a-ring position="0 0.05 0" radius-inner="0.03" radius-outer="0.06" color="white" rotation="-90 0 0"></a-ring>
           <a-ring position="0 0.3 0" radius-inner="0.03" radius-outer="0.06" color="white" rotation="-90 0 0"></a-ring>
         </a-entity>
@@ -46,36 +82,93 @@
 </a-scene>
 
 <script>
-  const guide = document.getElementById('guide-group');
-  
-  function updateGuide() {
-      // Rotation : on accepte le 0
-      const rx = parseFloat(document.getElementById('rotX').value) || 0;
-      const ry = parseFloat(document.getElementById('rotY').value) || 0;
-      const rz = parseFloat(document.getElementById('rotZ').value) || 0;
-      guide.setAttribute('rotation', { x: rx, y: ry, z: rz });
+  // Hide loading overlay when AR is ready
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      var loading = document.getElementById('loading');
+      if (loading) loading.style.display = 'none';
+    }, 3000);
+  });
 
-      // Position : on ne met à jour que si l'input n'est pas vide (pour éviter le saut à zéro)
-      const inputs = ['X', 'Y', 'Z'];
-      inputs.forEach(axis => {
-          const inputEl = document.getElementById('pos' + axis);
-          if (inputEl.value !== "") {
-              const val = parseFloat(inputEl.value) / 100;
-              // On récupère la position actuelle pour ne modifier que l'axe concerné
-              const currentPos = guide.getAttribute('position');
-              currentPos[axis.toLowerCase()] = val;
-              guide.setAttribute('position', currentPos);
-          }
-      });
+  // Panel toggle
+  var panelVisible = false;
+  document.getElementById('panelToggle').addEventListener('click', function () {
+    panelVisible = !panelVisible;
+    document.getElementById('controlPanel').style.display = panelVisible ? 'block' : 'none';
+  });
+
+  // Marker selector
+  var currentMarkerType = 'hiro';
+  function setMarker(type) {
+    currentMarkerType = type;
+    var marker = document.getElementById('arMarker');
+    var btnHiro = document.getElementById('btnHiro');
+    var btnCustom = document.getElementById('btnCustom');
+
+    if (type === 'hiro') {
+      marker.removeAttribute('type');
+      marker.removeAttribute('url');
+      marker.setAttribute('preset', 'hiro');
+      btnHiro.style.background = '#4caf50';
+      btnHiro.style.borderColor = '#4caf50';
+      btnCustom.style.background = 'transparent';
+      btnCustom.style.borderColor = '#666';
+    } else {
+      marker.removeAttribute('preset');
+      marker.setAttribute('type', 'pattern');
+      marker.setAttribute('url', 'pattern-marker.patt');
+      btnCustom.style.background = '#4caf50';
+      btnCustom.style.borderColor = '#4caf50';
+      btnHiro.style.background = 'transparent';
+      btnHiro.style.borderColor = '#666';
+    }
   }
 
-  // Écouteurs... (reste identique)
-  ['X', 'Y', 'Z'].forEach(axis => {
-      document.getElementById('rot' + axis).addEventListener('input', (e) => {
-          document.getElementById('val' + axis).textContent = e.target.value;
-          updateGuide();
-      });
-      document.getElementById('pos' + axis).addEventListener('input', updateGuide);
+  // Guide control
+  var guide = document.getElementById('guide-group');
+
+  function updateGuide() {
+    if (!guide) return;
+
+    // Rotation: accept 0
+    var rx = parseFloat(document.getElementById('rotX').value) || 0;
+    var ry = parseFloat(document.getElementById('rotY').value) || 0;
+    var rz = parseFloat(document.getElementById('rotZ').value) || 0;
+    guide.setAttribute('rotation', { x: rx, y: ry, z: rz });
+
+    // Position: only update if input is not empty (avoids jump to zero)
+    var axes = ['x', 'y', 'z'];
+    var currentPos = guide.getAttribute('position');
+    axes.forEach(function (axis) {
+      var inputEl = document.getElementById('pos' + axis.toUpperCase());
+      if (inputEl.value !== '') {
+        var val = parseFloat(inputEl.value) / 100;
+        currentPos[axis] = val;
+      }
+    });
+    guide.setAttribute('position', currentPos);
+  }
+
+  // Reset all controls to defaults
+  function resetGuide() {
+    ['X', 'Y', 'Z'].forEach(function (axis) {
+      document.getElementById('rot' + axis).value = 0;
+      document.getElementById('val' + axis).textContent = '0';
+      document.getElementById('pos' + axis).value = '';
+    });
+    if (guide) {
+      guide.setAttribute('rotation', { x: 0, y: 0, z: 0 });
+      guide.setAttribute('position', { x: 0, y: 0, z: 0 });
+    }
+  }
+
+  // Event listeners
+  ['X', 'Y', 'Z'].forEach(function (axis) {
+    document.getElementById('rot' + axis).addEventListener('input', function (e) {
+      document.getElementById('val' + axis).textContent = e.target.value;
+      updateGuide();
+    });
+    document.getElementById('pos' + axis).addEventListener('input', updateGuide);
   });
 </script>
 

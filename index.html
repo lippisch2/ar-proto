@@ -11,13 +11,19 @@
       width: 100%;
       height: 100%;
     }
-    a-scene, a-canvas, canvas, video {
-      display: block !important;
+    a-scene {
       position: fixed !important;
       top: 0 !important;
       left: 0 !important;
       width: 100vw !important;
       height: 100vh !important;
+    }
+    a-scene video, a-scene canvas {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
       object-fit: cover !important;
     }
   </style>
@@ -88,16 +94,48 @@
           <a-ring position="0 0.3 0" radius-inner="0.03" radius-outer="0.06" color="white" rotation="-90 0 0"></a-ring>
         </a-entity>
     </a-marker>
-    <a-entity camera></a-entity>
 </a-scene>
 
 <script>
+  // Force camera video to fill viewport
+  function resizeCamera() {
+    document.querySelectorAll('a-scene video, a-scene canvas, .a-canvas').forEach(function(el) {
+      el.style.position = 'absolute';
+      el.style.top = '0';
+      el.style.left = '0';
+      el.style.width = '100%';
+      el.style.height = '100%';
+      el.style.objectFit = 'cover';
+    });
+  }
+
   // Hide loading overlay when AR is ready
   window.addEventListener('load', function () {
+    var loading = document.getElementById('loading');
+    var scene = document.querySelector('a-scene');
+
+    // Try to hide loading when video plays
+    var checkVideo = setInterval(function () {
+      var vid = document.querySelector('a-scene video');
+      if (vid && vid.readyState >= 2) {
+        if (loading) loading.style.display = 'none';
+        clearInterval(checkVideo);
+        resizeCamera();
+      }
+    }, 500);
+
+    // Fallback: hide loading after 5s
     setTimeout(function () {
-      var loading = document.getElementById('loading');
       if (loading) loading.style.display = 'none';
-    }, 3000);
+      resizeCamera();
+    }, 5000);
+
+    // Resize camera on any DOM change inside scene
+    var observer = new MutationObserver(resizeCamera);
+    if (scene) observer.observe(scene, { childList: true, subtree: true });
+
+    // Resize on window resize
+    window.addEventListener('resize', resizeCamera);
   });
 
   // Panel toggle

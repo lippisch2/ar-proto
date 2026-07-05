@@ -12,14 +12,6 @@
       width: 100%;
       height: 100%;
     }
-    video {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      object-fit: cover !important;
-    }
   </style>
 </head>
 <body style="margin:0;overflow:hidden;">
@@ -76,7 +68,7 @@
     <button id="resetBtn" onclick="resetGuide()" style="width:100%;padding:8px;border:none;border-radius:6px;background:#e53935;color:white;cursor:pointer;font-size:14px;font-weight:bold;">Reset</button>
 </div>
 
-<a-scene arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: color_and_matrix; matrixCodeType: 3x3;">
+<a-scene embedded style="position:fixed;top:0;left:0;width:100vw;height:100vh;" arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: color_and_matrix; matrixCodeType: 3x3;">
     <a-marker id="arMarker" preset="hiro">
         <a-entity id="guide-group" position="0 0 0" rotation="0 0 0">
           <!-- 1. Needle path guide -->
@@ -91,46 +83,21 @@
 </a-scene>
 
 <script>
-  // Force all videos and canvases to fill viewport
-  function resizeMedia() {
-    var els = document.querySelectorAll('video, canvas, .a-canvas');
-    for (var i = 0; i < els.length; i++) {
-      els[i].style.setProperty('position', 'fixed', 'important');
-      els[i].style.setProperty('top', '0', 'important');
-      els[i].style.setProperty('left', '0', 'important');
-      els[i].style.setProperty('width', '100vw', 'important');
-      els[i].style.setProperty('height', '100vh', 'important');
-      els[i].style.setProperty('object-fit', 'cover', 'important');
-    }
-  }
-
   // Hide loading overlay when AR is ready
   window.addEventListener('load', function () {
     var loading = document.getElementById('loading');
-    var scene = document.querySelector('a-scene');
 
-    // Check for video periodically
     var checkVideo = setInterval(function () {
       var vid = document.querySelector('video');
       if (vid && vid.readyState >= 2) {
-        resizeMedia();
         if (loading) loading.style.display = 'none';
         clearInterval(checkVideo);
       }
-    }, 200);
+    }, 500);
 
-    // Fallback
     setTimeout(function () {
-      resizeMedia();
       if (loading) loading.style.display = 'none';
     }, 5000);
-
-    // Observe DOM changes
-    if (scene) {
-      var obs = new MutationObserver(resizeMedia);
-      obs.observe(scene, { childList: true, subtree: true });
-    }
-    window.addEventListener('resize', resizeMedia);
   });
 
   // Panel toggle

@@ -12,17 +12,6 @@
       width: 100%;
       height: 100%;
     }
-    a-scene {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-    }
-    a-scene canvas {
-      width: 100% !important;
-      height: 100% !important;
-    }
     video {
       position: fixed !important;
       top: 0 !important;
@@ -87,7 +76,7 @@
     <button id="resetBtn" onclick="resetGuide()" style="width:100%;padding:8px;border:none;border-radius:6px;background:#e53935;color:white;cursor:pointer;font-size:14px;font-weight:bold;">Reset</button>
 </div>
 
-<a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: color_and_matrix; matrixCodeType: 3x3;">
+<a-scene arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: color_and_matrix; matrixCodeType: 3x3;">
     <a-marker id="arMarker" preset="hiro">
         <a-entity id="guide-group" position="0 0 0" rotation="0 0 0">
           <!-- 1. Needle path guide -->

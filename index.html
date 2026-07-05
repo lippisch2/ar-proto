@@ -8,23 +8,17 @@
     html, body {
       margin: 0;
       overflow: hidden;
+      padding: 0;
       width: 100%;
       height: 100%;
     }
     a-scene {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-    }
-    a-scene video, a-scene canvas {
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: cover !important;
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
     }
   </style>
 </head>
@@ -36,12 +30,12 @@
 </div>
 
 <!-- Toggle button for control panel -->
-<button id="panelToggle" style="position:absolute;top:10px;left:10px;z-index:1001;background:rgba(0,0,0,0.8);color:white;border:none;border-radius:8px;padding:8px 12px;font-size:18px;cursor:pointer;">
+<button id="panelToggle" style="position:fixed;top:10px;left:10px;z-index:1001;background:rgba(0,0,0,0.8);color:white;border:none;border-radius:8px;padding:8px 12px;font-size:18px;cursor:pointer;">
   &#9881;
 </button>
 
 <!-- Control panel -->
-<div id="controlPanel" style="position:absolute;top:10px;left:10px;z-index:1000;background:rgba(0,0,0,0.8);padding:15px;border-radius:10px;color:white;font-family:sans-serif;font-size:14px;display:none;min-width:280px;">
+<div id="controlPanel" style="position:fixed;top:10px;left:10px;z-index:1000;background:rgba(0,0,0,0.8);padding:15px;border-radius:10px;color:white;font-family:sans-serif;font-size:14px;display:none;min-width:280px;">
 
     <!-- Marker selector -->
     <div style="margin-bottom:12px;">
@@ -82,7 +76,7 @@
     <button id="resetBtn" onclick="resetGuide()" style="width:100%;padding:8px;border:none;border-radius:6px;background:#e53935;color:white;cursor:pointer;font-size:14px;font-weight:bold;">Reset</button>
 </div>
 
-<a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: color_and_matrix; matrixCodeType: 3x3;">
+<a-scene arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: color_and_matrix; matrixCodeType: 3x3;">
     <a-marker id="arMarker" preset="hiro">
         <a-entity id="guide-group" position="0 0 0" rotation="0 0 0">
           <!-- 1. Needle path guide -->
@@ -97,45 +91,21 @@
 </a-scene>
 
 <script>
-  // Force camera video to fill viewport
-  function resizeCamera() {
-    document.querySelectorAll('a-scene video, a-scene canvas, .a-canvas').forEach(function(el) {
-      el.style.position = 'absolute';
-      el.style.top = '0';
-      el.style.left = '0';
-      el.style.width = '100%';
-      el.style.height = '100%';
-      el.style.objectFit = 'cover';
-    });
-  }
-
   // Hide loading overlay when AR is ready
   window.addEventListener('load', function () {
     var loading = document.getElementById('loading');
-    var scene = document.querySelector('a-scene');
 
-    // Try to hide loading when video plays
     var checkVideo = setInterval(function () {
       var vid = document.querySelector('a-scene video');
       if (vid && vid.readyState >= 2) {
         if (loading) loading.style.display = 'none';
         clearInterval(checkVideo);
-        resizeCamera();
       }
     }, 500);
 
-    // Fallback: hide loading after 5s
     setTimeout(function () {
       if (loading) loading.style.display = 'none';
-      resizeCamera();
     }, 5000);
-
-    // Resize camera on any DOM change inside scene
-    var observer = new MutationObserver(resizeCamera);
-    if (scene) observer.observe(scene, { childList: true, subtree: true });
-
-    // Resize on window resize
-    window.addEventListener('resize', resizeCamera);
   });
 
   // Panel toggle

@@ -9,7 +9,7 @@
 <div style="position:absolute;top:10px;left:10px;z-index:1000;background:rgba(0,0,0,0.8);padding:15px;border-radius:10px;color:white;font-family:sans-serif;font-size:14px;display:flex;flex-direction:column;gap:6px;min-width:200px;">
   <div style="display:flex;justify-content:space-between;align-items:center;">
     <span>World X (dx):</span>
-    <input id="inpDx" type="number" value="27.5" step="0.5" style="width:70px;text-align:right;"> cm
+    <input id="inpDx" type="number" value="35" step="0.5" style="width:70px;text-align:right;"> cm
   </div>
   <div style="display:flex;justify-content:space-between;align-items:center;">
     <span>Xm:</span>
@@ -45,7 +45,7 @@
 
 <a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;">
   <a-marker id="marker" preset="hiro" emitevents="true">
-    <a-entity id="world-offset" position="0 0.275 0">
+    <a-entity id="world-offset" position="0.35 0 0">
       <a-entity id="user-coords" rotation="0 0 -90">
         <a-entity id="target-marker" position="0 0 0" rotation="0 0 0">
           <a-cylinder position="0 0 0.075" radius="0.005" height="0.15" color="yellow" opacity="0.5" rotation="-90 0 0"></a-cylinder>
@@ -96,19 +96,30 @@
     const rz = parseFloat(inpRotZ.value) || 0;
     const iw = (parseFloat(inpImgW.value) || 35) / 100;
 
-    worldOffset.setAttribute('position', {x: 0, y: dx, z: 0});
-    targetMarker.setAttribute('position', {x: xm, y: 0, z: zm});
+    worldOffset.setAttribute('position', {x: dx, y: 0, z: 0});
+    targetMarker.setAttribute('position', {x: 0, y: -xm, z: zm});
     targetMarker.setAttribute('rotation', {x: rx, y: ry, z: rz});
     loadedImage.setAttribute('width', iw);
+    loadedImage.setAttribute('height', iw * imgAspect);
   }
+
+  let imgAspect = 1;
 
   inpFile.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(ev) {
-      loadedImage.setAttribute('src', ev.target.result);
-      loadedImage.setAttribute('visible', true);
+      const img = new Image();
+      img.onload = function() {
+        imgAspect = img.naturalHeight / img.naturalWidth;
+        const iw = (parseFloat(inpImgW.value) || 35) / 100;
+        loadedImage.setAttribute('src', ev.target.result);
+        loadedImage.setAttribute('width', iw);
+        loadedImage.setAttribute('height', iw * imgAspect);
+        loadedImage.setAttribute('visible', true);
+      };
+      img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
   });

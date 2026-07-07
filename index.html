@@ -6,7 +6,7 @@
 </head>
 <body style="margin:0;overflow:hidden;">
 <div style="position:absolute;bottom:70px;left:50%;transform:translateX(-50%);z-index:1000;color:#aaa;font-family:sans-serif;font-size:11px;text-align:center;line-height:1.4;">
-  <div>Deployed: 2026-07-08 12:00 UTC</div>
+  <div>Deployed: 2026-07-08 13:00 UTC</div>
 </div>
 <div id="marker-status" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(0,0,0,0.7);padding:6px 16px;border-radius:20px;color:#ff4444;font-family:sans-serif;font-size:13px;font-weight:bold;">Marker: not detected</div>
 <button id="toggle-controls" style="position:absolute;top:10px;left:10px;z-index:1001;background:rgba(0,0,0,0.6);color:white;border:1px solid #666;border-radius:5px;padding:4px 10px;font-family:sans-serif;font-size:12px;cursor:pointer;">H</button>
@@ -74,13 +74,15 @@
   const markerEl = document.getElementById('marker');
 
   let lostTimer = null;
+  const poseHistory = [];
+  const POSE_WINDOW = 15;
+  let poseFrameCount = 0;
+
   markerEl.addEventListener('markerFound', () => {
     if (lostTimer) {
       clearTimeout(lostTimer);
       lostTimer = null;
     }
-    statusEl.textContent = 'Marker: detected';
-    statusEl.style.color = '#44ff44';
   });
   markerEl.addEventListener('markerLost', () => {
     if (lostTimer) return;
@@ -89,6 +91,53 @@
       statusEl.style.color = '#ff4444';
       lostTimer = null;
     }, 300);
+  });
+
+  markerEl.addEventListener('markerPose', (e) => {
+    const pos = e.detail.position;
+    if (!pos) return;
+
+    poseHistory.push({x: pos.x, y: pos.y, z: pos.z});
+    if (poseHistory.length > POSE_WINDOW) {
+      poseHistory.shift();
+    }
+
+    if (poseHistory.length < 5) return;
+
+    poseFrameCount++;
+    if (poseFrameCount % 5 !== 0) return;
+
+    const xs = poseHistory.map(p => p.x);
+    const ys = poseHistory.map(p => p.y);
+    const zs = poseHistory.map(p => p.z);
+
+    const spreadX = Math.max(...xs) - Math.min(...xs);
+    const spreadY = Math.max(...ys) - Math.min(...ys);
+    const spreadZ = Math.max(...zs) - Math.min(...zs);
+
+    const avgSpread = (spreadX + spreadY + spreadZ) / 3;
+
+    let confidence;
+    if (avgSpread < 0.001) {
+      confidence = 95 + (0.001 - avgSpread) / 0.001 * 5;
+    } else if (avgSpread < 0.01) {
+      confidence = 70 + (0.01 - avgSpread) / 0.009 * 25;
+    } else if (avgSpread < 0.05) {
+      confidence = 20 + (0.05 - avgSpread) / 0.04 * 50;
+    } else {
+      confidence = Math.max(0, 20 - (avgSpread - 0.05) / 0.05 * 20);
+    }
+
+    confidence = Math.round(Math.min(100, Math.max(0, confidence)));
+
+    statusEl.textContent = `Marker: detected — ${confidence}%`;
+    if (confidence > 60) {
+      statusEl.style.color = '#44ff44';
+    } else if (confidence > 30) {
+      statusEl.style.color = '#ffaa00';
+    } else {
+      statusEl.style.color = '#ff4444';
+    }
   });
 
   const worldOffset = document.getElementById('world-offset');

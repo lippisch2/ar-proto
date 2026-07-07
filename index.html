@@ -6,12 +6,12 @@
 </head>
 <body style="margin:0;overflow:hidden;">
 <div style="position:absolute;bottom:70px;left:50%;transform:translateX(-50%);z-index:1000;color:#aaa;font-family:sans-serif;font-size:11px;text-align:center;line-height:1.4;">
-  <div>Deployed: 2026-07-07 22:32 UTC</div>
+  <div>Deployed: 2026-07-07 22:48 UTC</div>
 </div>
 <div id="marker-status" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(0,0,0,0.7);padding:6px 16px;border-radius:20px;color:#ff4444;font-family:sans-serif;font-size:13px;font-weight:bold;">Marker: not detected</div>
 <div style="position:absolute;top:10px;left:10px;z-index:1000;background:rgba(0,0,0,0.8);padding:15px;border-radius:10px;color:white;font-family:sans-serif;font-size:14px;display:flex;flex-direction:column;gap:6px;min-width:200px;">
   <div style="display:flex;justify-content:space-between;align-items:center;">
-    <span>World X (dx):</span>
+    <span>Offset:</span>
     <input id="inpDx" type="number" value="35" step="0.5" style="width:70px;text-align:right;"> cm
   </div>
   <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -48,7 +48,7 @@
 
 <a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;">
   <a-marker id="marker" preset="hiro" size="0.15" emitevents="true">
-    <a-entity id="world-offset" position="0.35 0 0">
+    <a-entity id="world-offset" position="0 0.35 0">
       <a-entity id="user-coords" rotation="0 0 -90">
         <a-entity id="target-marker" position="0 0 0" rotation="0 0 0">
           <a-cylinder position="0 0 0.075" radius="0.005" height="0.15" color="yellow" opacity="0.5" rotation="-90 0 0"></a-cylinder>
@@ -56,7 +56,7 @@
           <a-ring position="0 0 0.05" radius-inner="0.02" radius-outer="0.05" color="white"></a-ring>
           <a-ring position="0 0 0.10" radius-inner="0.02" radius-outer="0.05" color="white"></a-ring>
         </a-entity>
-        <a-image id="loaded-image" rotation="-90 0 0" width="0.35" material="opacity:0.6;transparent:true" visible="false"></a-image>
+        <a-image id="loaded-image" rotation="90 0 90" width="0.35" material="opacity:0.6;transparent:true" visible="false"></a-image>
       </a-entity>
     </a-entity>
   </a-marker>
@@ -99,11 +99,13 @@
     const rz = parseFloat(inpRotZ.value) || 0;
     const iw = (parseFloat(inpImgW.value) || 35) / 100;
 
-    worldOffset.setAttribute('position', {x: dx, y: 0, z: 0});
-    targetMarker.setAttribute('position', {x: xm, y: 0, z: zm});
+    worldOffset.setAttribute('position', {x: 0, y: dx, z: 0});
+    targetMarker.setAttribute('position', {x: zm, y: 0, z: xm});
     targetMarker.setAttribute('rotation', {x: rx, y: ry, z: rz});
+    const ih = iw * imgAspect;
     loadedImage.setAttribute('width', iw);
-    loadedImage.setAttribute('height', iw * imgAspect);
+    loadedImage.setAttribute('height', ih);
+    loadedImage.setAttribute('position', {x: 0, y: 0, z: ih / 2});
   }
 
   let imgAspect = 1;
@@ -117,9 +119,11 @@
       img.onload = function() {
         imgAspect = img.naturalHeight / img.naturalWidth;
         const iw = (parseFloat(inpImgW.value) || 35) / 100;
+        const ih = iw * imgAspect;
         loadedImage.setAttribute('src', ev.target.result);
         loadedImage.setAttribute('width', iw);
-        loadedImage.setAttribute('height', iw * imgAspect);
+        loadedImage.setAttribute('height', ih);
+        loadedImage.setAttribute('position', {x: 0, y: 0, z: ih / 2});
         loadedImage.setAttribute('visible', true);
       };
       img.src = ev.target.result;

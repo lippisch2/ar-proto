@@ -6,7 +6,7 @@
 </head>
 <body style="margin:0;overflow:hidden;">
 <div style="position:absolute;bottom:70px;left:50%;transform:translateX(-50%);z-index:1000;color:#aaa;font-family:sans-serif;font-size:11px;text-align:center;line-height:1.4;">
-  <div>Deployed: 2026-07-07 22:48 UTC</div>
+  <div>Deployed: 2026-07-07 23:02 UTC</div>
 </div>
 <div id="marker-status" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(0,0,0,0.7);padding:6px 16px;border-radius:20px;color:#ff4444;font-family:sans-serif;font-size:13px;font-weight:bold;">Marker: not detected</div>
 <div style="position:absolute;top:10px;left:10px;z-index:1000;background:rgba(0,0,0,0.8);padding:15px;border-radius:10px;color:white;font-family:sans-serif;font-size:14px;display:flex;flex-direction:column;gap:6px;min-width:200px;">
@@ -41,7 +41,7 @@
     <input id="inpFile" type="file" accept="image/*" style="width:130px;color:white;">
   </div>
   <div style="display:flex;justify-content:space-between;align-items:center;">
-    <span>Img width:</span>
+    <span>Max dim:</span>
     <input id="inpImgW" type="number" value="35" step="1" style="width:70px;text-align:right;"> cm
   </div>
 </div>
@@ -56,14 +56,17 @@
           <a-ring position="0 0 0.05" radius-inner="0.02" radius-outer="0.05" color="white"></a-ring>
           <a-ring position="0 0 0.10" radius-inner="0.02" radius-outer="0.05" color="white"></a-ring>
         </a-entity>
-        <a-image id="loaded-image" rotation="90 0 90" width="0.35" material="opacity:0.6;transparent:true" visible="false"></a-image>
+        <a-image id="loaded-image" look-at="#camera" width="0.35" material="opacity:0.6;transparent:true" visible="false"></a-image>
       </a-entity>
     </a-entity>
   </a-marker>
-  <a-entity camera></a-entity>
+  <a-entity id="camera" camera></a-entity>
 </a-scene>
 
 <script>
+  const MS = 0.15;
+  const cm = v => (v / 15) * MS;
+
   const statusEl = document.getElementById('marker-status');
   const markerEl = document.getElementById('marker');
 
@@ -91,21 +94,29 @@
   const inpImgW = document.getElementById('inpImgW');
 
   function updateScene() {
-    const dx = (parseFloat(inpDx.value) || 0) / 100;
-    const xm = (parseFloat(inpXm.value) || 0) / 100;
-    const zm = (parseFloat(inpZm.value) || 0) / 100;
+    const dx = cm(parseFloat(inpDx.value) || 0);
+    const xm = cm(parseFloat(inpXm.value) || 0);
+    const zm = cm(parseFloat(inpZm.value) || 0);
     const ry = parseFloat(inpRotY.value) || 0;
     const rx = parseFloat(inpRotX.value) || 0;
     const rz = parseFloat(inpRotZ.value) || 0;
-    const iw = (parseFloat(inpImgW.value) || 35) / 100;
+    const targetDim = cm(parseFloat(inpImgW.value) || 35);
+
+    let imgW, imgH;
+    if (imgAspect >= 1) {
+      imgW = targetDim / imgAspect;
+      imgH = targetDim;
+    } else {
+      imgW = targetDim;
+      imgH = targetDim * imgAspect;
+    }
 
     worldOffset.setAttribute('position', {x: 0, y: dx, z: 0});
     targetMarker.setAttribute('position', {x: zm, y: 0, z: xm});
     targetMarker.setAttribute('rotation', {x: rx, y: ry, z: rz});
-    const ih = iw * imgAspect;
-    loadedImage.setAttribute('width', iw);
-    loadedImage.setAttribute('height', ih);
-    loadedImage.setAttribute('position', {x: 0, y: 0, z: ih / 2});
+    loadedImage.setAttribute('width', imgW);
+    loadedImage.setAttribute('height', imgH);
+    loadedImage.setAttribute('position', {x: 0, y: 0, z: imgH / 2});
   }
 
   let imgAspect = 1;
@@ -118,12 +129,19 @@
       const img = new Image();
       img.onload = function() {
         imgAspect = img.naturalHeight / img.naturalWidth;
-        const iw = (parseFloat(inpImgW.value) || 35) / 100;
-        const ih = iw * imgAspect;
+        const targetDim = cm(parseFloat(inpImgW.value) || 35);
+        let imgW, imgH;
+        if (imgAspect >= 1) {
+          imgW = targetDim / imgAspect;
+          imgH = targetDim;
+        } else {
+          imgW = targetDim;
+          imgH = targetDim * imgAspect;
+        }
         loadedImage.setAttribute('src', ev.target.result);
-        loadedImage.setAttribute('width', iw);
-        loadedImage.setAttribute('height', ih);
-        loadedImage.setAttribute('position', {x: 0, y: 0, z: ih / 2});
+        loadedImage.setAttribute('width', imgW);
+        loadedImage.setAttribute('height', imgH);
+        loadedImage.setAttribute('position', {x: 0, y: 0, z: imgH / 2});
         loadedImage.setAttribute('visible', true);
       };
       img.src = ev.target.result;

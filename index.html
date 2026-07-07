@@ -48,7 +48,7 @@
 
 <a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;trackingMethod:best;patternRatio:0.5;minConfidence:0.2;markerSize:0.15;">
   <a-marker id="marker" preset="hiro" size="0.15" emitevents="true" smooth="true" smoothCount="5" smoothTolerance="0.005">
-    <a-entity id="world-offset" position="0 0 2.333">
+    <a-entity id="world-offset" position="0 0 -2.333">
       <a-entity id="user-coords" rotation="0 0 -90">
         <a-entity id="target-marker" position="0 0 0" rotation="0 0 0">
           <a-cylinder position="0 0 0.167" radius="0.005" height="0.333" color="yellow" opacity="0.5" rotation="-90 0 0"></a-cylinder>
@@ -122,7 +122,7 @@
       imgH = targetDim * imgAspect;
     }
 
-    worldOffset.setAttribute('position', {x: 0, y: 0, z: dx});
+    worldOffset.setAttribute('position', {x: 0, y: 0, z: -dx});
     targetMarker.setAttribute('position', {x: -zm, y: 0, z: -xm});
     targetMarker.setAttribute('rotation', {x: rx, y: ry, z: rz});
     loadedImage.setAttribute('width', imgW);

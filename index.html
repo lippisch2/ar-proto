@@ -128,7 +128,7 @@
     targetMarker.setAttribute('rotation', {x: rx, y: ry, z: rz});
     loadedImage.setAttribute('width', imgW);
     loadedImage.setAttribute('height', imgH);
-    loadedImage.setAttribute('position', {x: imgH, y: 0, z: 0});
+    loadedImage.setAttribute('position', {x: 0, y: 0, z: -imgH});
   }
 
   let imgAspect = 1;
@@ -153,7 +153,7 @@
         loadedImage.setAttribute('src', ev.target.result);
         loadedImage.setAttribute('width', imgW);
         loadedImage.setAttribute('height', imgH);
-        loadedImage.setAttribute('position', {x: imgH, y: 0, z: 0});
+        loadedImage.setAttribute('position', {x: 0, y: 0, z: -imgH});
         loadedImage.setAttribute('visible', true);
       };
       img.src = ev.target.result;

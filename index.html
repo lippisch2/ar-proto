@@ -83,6 +83,8 @@
       clearTimeout(lostTimer);
       lostTimer = null;
     }
+    statusEl.textContent = 'Marker: detected';
+    statusEl.style.color = '#44ff44';
   });
   markerEl.addEventListener('markerLost', () => {
     if (lostTimer) return;

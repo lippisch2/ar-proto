@@ -52,10 +52,10 @@
     <a-entity id="world-offset" position="0 0 -2.333">
       <a-entity id="user-coords" rotation="0 0 -90">
         <a-entity id="target-marker" position="0 0 0" rotation="0 0 0">
-          <a-cylinder position="0 0 0.167" radius="0.005" height="0.333" color="yellow" opacity="0.5" rotation="-90 0 0"></a-cylinder>
+          <a-cylinder position="0 0 0.5" radius="0.005" height="1.0" color="yellow" opacity="0.5" rotation="-90 0 0"></a-cylinder>
           <a-sphere position="0 0 0" radius="0.089" color="red"></a-sphere>
-          <a-ring position="0 0 0.111" radius-inner="0.044" radius-outer="0.111" color="white"></a-ring>
-          <a-ring position="0 0 0.222" radius-inner="0.044" radius-outer="0.111" color="white"></a-ring>
+          <a-ring position="0 0 0.333" radius-inner="0.044" radius-outer="0.111" color="white" material="side:double"></a-ring>
+          <a-ring position="0 0 0.667" radius-inner="0.044" radius-outer="0.111" color="white" material="side:double"></a-ring>
         </a-entity>
         <a-entity rotation="0 90 0">
           <a-image id="loaded-image" rotation="90 180 0" width="2.333" material="opacity:0.6;transparent:true" visible="false"></a-image>
